@@ -1,0 +1,27 @@
+spring:
+  server:
+    address: 0.0.0.0
+    port: 8080
+  datasource:
+    url: jdbc:h2:mem:carekeeperdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${APP_USERNAME}
+    password: ${APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
