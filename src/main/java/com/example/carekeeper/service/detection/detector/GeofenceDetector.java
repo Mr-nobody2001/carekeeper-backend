@@ -25,6 +25,13 @@ public class GeofenceDetector implements AccidentDetector {
         this.radiusMeters = (config != null) ? config.getRadiusMeters() : 100.0;
         this.enabled = config.isEnabled();
         this.envUtil = envUtil;
+        if (envUtil.isDev()) {
+            log.debug("GeofenceDetector config: enabled={} | centerLat={} | centerLon={} | radiusMeters={}",
+                    this.enabled,
+                    this.centerLat,
+                    this.centerLon,
+                    this.radiusMeters);
+        }
     }
 
     @Override

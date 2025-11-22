@@ -48,7 +48,6 @@ public class FallDetector implements AccidentDetector {
         UserConfig.Fall cfg = (config != null) ? config : new UserConfig.Fall();
         this.enabled = cfg.isEnabled();
 
-        // Use user-facing sensitivity from UserConfig; keep algorithm thresholds local
         Sensitivity s = cfg.getSensitivity();
         double multiplier = (s != null) ? s.getMultiplier() : 1.0;
 
@@ -62,6 +61,21 @@ public class FallDetector implements AccidentDetector {
         this.maxFallImpactIntervalMs = DEFAULT_MAX_FALL_IMPACT_INTERVAL_MS;
 
         this.history = new ArrayDeque<>(this.readingWindow);
+        if (envUtil.isDev()) {
+            log.debug("FallDetector config: enabled={} | sensitivity={} | multiplier={} | freeFallThreshold={} | impactThreshold={} | immobilityThreshold={} | gyroThreshold={} | readingWindow={} | minHistoryReadings={} | immobilityTimeMs={} | maxFallImpactIntervalMs={}",
+                    this.enabled,
+                    cfg.getSensitivity(),
+                    multiplier,
+                    this.freeFallThreshold,
+                    this.impactThreshold,
+                    this.immobilityThreshold,
+                    this.gyroThreshold,
+                    this.readingWindow,
+                    this.minHistoryReadings,
+                    this.immobilityTimeMs,
+                    this.maxFallImpactIntervalMs
+            );
+        }
     }
 
     @Override
