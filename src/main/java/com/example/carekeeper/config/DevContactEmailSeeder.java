@@ -54,7 +54,8 @@ public class DevContactEmailSeeder implements ApplicationRunner {
         if (contactRepo.findByOwnerId(userId).isEmpty()) {
             List<ContactEmailEntity> contacts = List.of(
                 new ContactEmailEntity(null, "gabrielbarbosadev2022@gmail.com", "Gabriel Barbosa", user),
-                new ContactEmailEntity(null, "lovablel59011551@gmail.com", "Lovable", user)
+                new ContactEmailEntity(null, "lovablel59011551@gmail.com", "Lovable", user),
+                new ContactEmailEntity(null, "20222012000046@pucgo.edu.br", "Gabriel Barbosa (PUC)", user)
             );
 
             contactRepo.saveAll(contacts);
