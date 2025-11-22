@@ -4,18 +4,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Contém a leitura (mensagem ou identificação do alerta)
+ * e as coordenadas geográficas do evento.
+ */
+@Data 
+@NoArgsConstructor 
+@AllArgsConstructor 
 public class PanicAlertRequest {
+
+    /** 
+     * Texto ou código referente à leitura do alerta.
+     * Exemplo: "Botão de pânico pressionado" ou "sensor_1".
+     */
     private String leitura;
+
+    /** Latitude do local onde o alerta foi gerado. */
     private double latitude;
+
+    /** Longitude do local onde o alerta foi gerado. */
     private double longitude;
-
-    // Getters e setters
-    public String getLeitura() { return leitura; }
-    public void setLeitura(String leitura) { this.leitura = leitura; }
-
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
-
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
 }

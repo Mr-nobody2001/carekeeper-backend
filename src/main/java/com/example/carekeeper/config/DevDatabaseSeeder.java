@@ -12,6 +12,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 @Profile("dev")
 public class DevDatabaseSeeder implements ApplicationRunner {
@@ -29,8 +31,7 @@ public class DevDatabaseSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // seed a default config for a demo user (userId = 1) if not present
-        Long demoUserId = 1L;
+        UUID demoUserId = UUID.fromString("00000000-0000-0000-0000-000000000001");
         if (repo.findByUserId(demoUserId).isEmpty()) {
             try {
                 UserConfig defaults = userConfigService.getDefaultConfig();

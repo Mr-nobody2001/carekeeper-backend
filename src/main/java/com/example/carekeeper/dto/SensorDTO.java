@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SensorDTO {
-
     // Movimento
     private Double accelerometerX;
     private Double accelerometerY;
@@ -20,11 +19,9 @@ public class SensorDTO {
     private Double gyroscopeX;
     private Double gyroscopeY;
     private Double gyroscopeZ;
-
     // Localização
     private Double latitude;
     private Double longitude;
-
     // Tempo
     private Long timestamp;
 }

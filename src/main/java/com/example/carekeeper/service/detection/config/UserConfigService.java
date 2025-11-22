@@ -2,6 +2,7 @@ package com.example.carekeeper.service.detection.config;
 
 import com.example.carekeeper.model.ConfiguracaoEntity;
 import com.example.carekeeper.pojo.UserConfig;
+import java.util.UUID;
 import com.example.carekeeper.repository.ConfiguracaoRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class UserConfigService {
      * Retorna a configuração do usuário desserializada a partir da tabela `configuracao`.
      * Se não houver nada, cria um registro padrão no banco (apenas para ambiente dev) e retorna defaults.
      */
-    public UserConfig getConfigForUser(Long userId) {
+    public UserConfig getConfigForUser(UUID userId) {
         try {
             return repo.findByUserId(userId)
                     .map(ConfiguracaoEntity::getConfigJson)

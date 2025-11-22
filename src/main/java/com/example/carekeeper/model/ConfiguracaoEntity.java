@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.UUID;
 
 @Entity
 @Table(name = "configuracao")
@@ -21,14 +22,14 @@ public class ConfiguracaoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private Long userId;
+    @Column(name = "user_id", nullable = false, unique = true, columnDefinition = "VARCHAR(36)")
+    private UUID userId;
 
     @Column(name = "config_json", columnDefinition = "TEXT")
     private String configJson;
 
     // Construtor só com userId e configJson
-    public ConfiguracaoEntity(Long userId, String configJson) {
+    public ConfiguracaoEntity(UUID userId, String configJson) {
         this.userId = userId;
         this.configJson = configJson;
     }
