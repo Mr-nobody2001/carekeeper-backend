@@ -1,92 +1,134 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Alerta de Emergência</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #101010;
-            color: #ffffff;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            margin: auto;
-            background-color: #1c1c1c;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2px solid #ff3b30;
-        }
-        .header {
-            background-color: #ff3b30;
-            padding: 20px;
-            text-align: center;
-        }
-        .header img {
-            width: 80px;
-            height: 80px;
-        }
-        .header h1 {
-            color: white;
-            margin: 10px 0 0 0;
-            font-size: 24px;
-        }
-        .content {
-            padding: 20px;
-        }
-        .content p {
-            font-size: 16px;
-            line-height: 1.5;
-        }
-        .content img.map {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        .footer {
-            padding: 10px 20px;
-            background-color: #222222;
-            text-align: center;
-            font-size: 12px;
-            color: #aaaaaa;
-        }
-        .highlight {
-            color: #ff3b30;
-            font-weight: bold;
-        }
-        a {
-            color: #ff3b30;
-            text-decoration: none;
-        }
+      body {
+        font-family: "Roboto", system-ui, -apple-system, "Segoe UI", Arial,
+          sans-serif;
+        background-color: #f7f9fc;
+        color: #112233;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 24px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e0e6ef;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+      }
+
+      .header {
+        background-color: #1565c0;
+        padding: 24px;
+        text-align: center;
+      }
+
+      .header img {
+        width: 80px;
+        height: auto;
+        object-fit: contain;
+        margin-bottom: 8px;
+      }
+
+      .header h1 {
+        color: white;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .content {
+        padding: 24px;
+      }
+
+      .content p {
+        font-size: 1.125rem;
+        line-height: 1.7;
+        margin: 8px 0;
+        color: #112233;
+      }
+
+      .highlight {
+        color: #2e7d32;
+        font-weight: 600;
+      }
+
+      .map {
+        width: 100%;
+        border-radius: 10px;
+        margin-top: 12px;
+        border: 1px solid #ddd;
+      }
+
+      a {
+        color: #1565c0;
+        text-decoration: none;
+      }
+
+      .datetime {
+        margin: 12px 0;
+        padding: 10px;
+        background-color: #e3f2fd;
+        border-radius: 6px;
+        border-left: 4px solid #1565c0;
+      }
+
+      .datetime p {
+        margin: 0;
+        font-size: 1.05rem;
+        color: #112233;
+      }
+
+      .footer {
+        padding: 16px;
+        background-color: #f0f4fa;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #345;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <img src="https://cdn-icons-png.flaticon.com/512/564/564619.png" alt="Alerta">
-            <h1>ALERTA DE EMERGÊNCIA</h1>
-        </div>
-        <div class="content">
-            <p>O <span class="highlight">botão de pânico</span> foi acionado.</p>
-            <p><strong>Mensagem:</strong> {{message}}</p>
-            <p><strong>Data/Hora:</strong> {{timestamp}}</p>
+      <div class="header">
+        <img src="cid:alertIcon" alt="Logo CareKeeper" />
+        <h1>Alerta de Emergência</h1>
+      </div>
+      <div class="content">
+        <p>
+          ⚠️ O <span class="highlight">botão de pânico</span> foi acionado!
+          Verifique imediatamente a situação de <strong>{{name}}</strong> e siga
+          todos os procedimentos de segurança recomendados.
+        </p>
 
-            <!-- Mapa com marcador -->
-            <p><strong>Localização:</strong></p>
-            <a href="https://www.google.com/maps?q={{latitude}},{{longitude}}" target="_blank">
-                <img class="map"
-                    src="https://maps.googleapis.com/maps/api/staticmap?center={{latitude}},{{longitude}}&zoom=15&size=600x300&markers=color:red%7C{{latitude}},{{longitude}}&key={{STATIC_MAP_API_KEY}}"
-                    alt="Mapa de localização">
-            </a>
+        <div class="datetime">
+          <p>📅 <strong>Data:</strong> {{date}}</p>
+          <p>⏰ <strong>Hora:</strong> {{time}}</p>
+        </div>
 
-            <p>Verifique imediatamente a situação e siga os procedimentos de emergência.</p>
-        </div>
-        <div class="footer">
-            Este é um e-mail automático do sistema CareKeeper. Não responda a esta mensagem.
-        </div>
+        <p>📍 <strong>Localização:</strong></p>
+        <a
+          href="https://www.google.com/maps?q={{latitude}},{{longitude}}"
+          target="_blank"
+        >
+          <img
+            class="map"
+            src="https://maps.googleapis.com/maps/api/staticmap?center={{latitude}},{{longitude}}&zoom=15&size=600x300&markers=color:red%7C{{latitude}},{{longitude}}&key={{STATIC_MAP_API_KEY}}"
+            alt="Mapa de localização"
+          />
+        </a>
+      </div>
+      <div class="footer">
+        CareKeeper &copy; 2025 — Sistema de monitoramento inteligente
+      </div>
     </div>
-</body>
+  </body>
 </html>

@@ -6,39 +6,39 @@ import lombok.Getter;
 public enum AccidentType {
     FALL(
         "Queda detectada",
-        "Movimentos bruscos foram detectados. Verifique se o idoso está bem."
+        "{{name}} sofreu uma possível queda. Verifique imediatamente se ele(a) está bem e, se necessário, acione ajuda."
     ),
     IMMOBILITY(
-        "Sem movimento prolongado",
-        "O idoso está parado por algum tempo. Confirme se está confortável."
+        "Imobilidade prolongada",
+        "{{name}} está sem movimentação há um tempo considerável. Certifique-se de que está confortável e consciente."
     ),
     OUT_OF_SAFE_ZONE(
         "Saída da área segura",
-        "O idoso deixou a zona segura. Oriente-o ou acompanhe de perto."
+        "{{name}} deixou a área segura definida. Entre em contato e verifique se está em um local seguro."
     ),
     ABNORMAL_HEARTBEAT(
-        "Frequência cardíaca fora do normal",
-        "O batimento cardíaco está diferente do habitual. Observe e, se necessário, procure ajuda."
+        "Alteração nos batimentos cardíacos",
+        "Os batimentos cardíacos de {{name}} estão fora do padrão. Monitore e, se persistir, procure atendimento médico."
     ),
     LOW_OXYGEN(
-        "Oxigenação baixa",
-        "O nível de oxigênio está abaixo do recomendado. Fique atento e, se necessário, busque assistência."
+        "Baixa oxigenação detectada",
+        "O nível de oxigênio de {{name}} está abaixo do ideal. Avalie o estado de saúde e procure auxílio, se necessário."
     ),
     FEVER_OR_HYPOTHERMIA(
-        "Temperatura corporal fora do normal",
-        "A temperatura do corpo está diferente do habitual. Monitore e tome cuidado."
+        "Temperatura corporal anormal",
+        "A temperatura corporal de {{name}} está fora da faixa normal. Monitore e mantenha sob observação."
     ),
     CRITICAL_BLOOD_PRESSURE(
-        "Pressão arterial fora do normal",
-        "A pressão arterial está acima ou abaixo do recomendado. Observe sinais e cuide da segurança."
+        "Pressão arterial em nível crítico",
+        "A pressão arterial de {{name}} está em nível preocupante. Acompanhe de perto e busque ajuda médica, se preciso."
     ),
     MOVEMENT_ALONE(
-        "Idoso levantou-se sozinho",
-        "O idoso se levantou sozinho. Acompanhe para evitar riscos de queda."
+        "Movimento independente detectado",
+        "{{name}} se levantou sozinho(a). Observe para evitar quedas ou outros acidentes."
     ),
     DARK_ENVIRONMENT(
-        "Pouca luminosidade",
-        "O ambiente está escuro, aumentando o risco de tropeços. Verifique a iluminação."
+        "Ambiente com pouca iluminação",
+        "O local onde {{name}} está possui pouca luz. Isso pode aumentar o risco de tropeços — verifique a iluminação."
     );
 
     private final String title;

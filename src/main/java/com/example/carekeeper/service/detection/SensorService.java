@@ -1,25 +1,26 @@
 package com.example.carekeeper.service.detection;
 
 import com.example.carekeeper.dto.SensorDTO;
-import com.example.carekeeper.util.EnvironmentUtil;
 import com.example.carekeeper.enums.AccidentType;
-import com.example.carekeeper.service.email.EmailService;
 import com.example.carekeeper.enums.EmailTemplate;
 import com.example.carekeeper.model.AccidentRecordEntity;
+import com.example.carekeeper.model.ContactEmailEntity;
+import com.example.carekeeper.model.UserEntity;
 import com.example.carekeeper.repository.AccidentRecordRepository;
+import com.example.carekeeper.repository.UserRepository;
 import com.example.carekeeper.service.detection.AccidentDetection;
 import com.example.carekeeper.service.email.ContactEmailService;
-import com.example.carekeeper.model.ContactEmailEntity;
+import com.example.carekeeper.service.email.EmailService;
+import com.example.carekeeper.util.EnvironmentUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.UUID;
 
@@ -30,8 +31,9 @@ public class SensorService {
     private final EmailService emailService;
     private final AccidentDetection accidentDetection;
     private final EnvironmentUtil envUtil;
-    private final ContactEmailService contactEmailService; // 🔹 novo
-    private final com.example.carekeeper.repository.AccidentRecordRepository accidentRecordRepo;
+    private final ContactEmailService contactEmailService;
+    private final AccidentRecordRepository accidentRecordRepo;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     private SensorDTO lastReading;
@@ -47,7 +49,8 @@ public class SensorService {
             AccidentDetection accidentDetection,
             EnvironmentUtil envUtil,
             ContactEmailService contactEmailService,
-            com.example.carekeeper.repository.AccidentRecordRepository accidentRecordRepo,
+            AccidentRecordRepository accidentRecordRepo,
+            UserRepository userRepository,
             ObjectMapper objectMapper
     ) {
         this.emailService = emailService;
@@ -55,6 +58,7 @@ public class SensorService {
         this.envUtil = envUtil;
         this.contactEmailService = contactEmailService;
         this.accidentRecordRepo = accidentRecordRepo;
+        this.userRepository = userRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -68,27 +72,41 @@ public class SensorService {
 
         List<AccidentType> accidents = accidentDetection.check(userId, currentReading, lastReading, envUtil);
         lastReading = currentReading;
-
         hasDetectedAccidents = hasAccidents(accidents);
 
         if (hasDetectedAccidents) {
             try {
+                // 🔹 Busca o nome do usuário
+                String userName = userRepository.findById(userId)
+                        .map(UserEntity::getName)
+                        .orElse("Usuário");
+
                 // Monta HTML dos alertas detectados
                 StringBuilder alertsHtml = new StringBuilder();
                 for (AccidentType accident : accidents) {
+                    String descricaoPersonalizada = accident.getDescription().replace("{{name}}", userName);
                     alertsHtml.append("<div class='alert-item'>")
                               .append("<h2>").append(accident.getTitle()).append("</h2>")
-                              .append("<p>").append(accident.getDescription()).append("</p>")
+                              .append("<p>").append(descricaoPersonalizada).append("</p>")
                               .append("</div>");
                 }
 
-                String timestamp = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-                        .withZone(ZoneId.systemDefault())
-                        .format(java.time.Instant.ofEpochMilli(currentReading.getTimestamp()));
+                // Formata data e hora separadamente
+                Instant timestampInstant = Instant.ofEpochMilli(currentReading.getTimestamp());
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                        .withZone(ZoneId.of("America/Sao_Paulo"));
+                DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+                        .withZone(ZoneId.of("America/Sao_Paulo"));
 
+                String date = dateFormatter.format(timestampInstant);
+                String time = timeFormatter.format(timestampInstant);
+
+                // Mapeia placeholders
                 Map<String, String> placeholders = new HashMap<>();
+                placeholders.put("name", userName);
                 placeholders.put("message", alertsHtml.toString());
-                placeholders.put("timestamp", timestamp);
+                placeholders.put("date", date);
+                placeholders.put("time", time);
                 placeholders.put("latitude", String.valueOf(currentReading.getLatitude()));
                 placeholders.put("longitude", String.valueOf(currentReading.getLongitude()));
                 placeholders.put("STATIC_MAP_API_KEY", staticMapApiKey);
@@ -100,21 +118,26 @@ public class SensorService {
                     return true;
                 }
 
-                // Envia para todos os contatos
+                // Caminho da imagem local embutida (logo Unati)
+                String imagePath = "src/main/resources/static/images/logo_unati_horizontal.png";
+
+                // Envia o e-mail para todos os contatos do usuário
                 String subject = "🚨 " + accidents.size() + " acidente(s) detectado(s)";
                 for (ContactEmailEntity contato : contatos) {
-                    emailService.sendEmail(
+                    emailService.sendEmailWithInlineImage(
                             contato.getEmail(),
                             subject,
                             EmailTemplate.EMERGENCY_ALERT_TEMPLATE,
-                            placeholders
+                            placeholders,
+                            "alertIcon", // deve coincidir com cid do HTML
+                            imagePath
                     );
                 }
 
-                // Persiste os registros dos acidentes detectados
+                // Persiste os registros de acidentes detectados
                 String sensorJson = objectMapper.writeValueAsString(currentReading);
                 for (AccidentType at : accidents) {
-                    var record = new com.example.carekeeper.model.AccidentRecordEntity(
+                    AccidentRecordEntity record = new AccidentRecordEntity(
                             userId, sensorJson, at, currentReading.getTimestamp());
                     accidentRecordRepo.save(record);
                 }
