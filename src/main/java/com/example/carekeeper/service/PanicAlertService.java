@@ -16,8 +16,8 @@ import com.example.carekeeper.model.ContactEmailEntity;
 import com.example.carekeeper.model.UserEntity;
 import com.example.carekeeper.dto.PanicAlertRequest;
 import com.example.carekeeper.repository.UserRepository;
-import com.example.carekeeper.service.email.ContactEmailService;
-import com.example.carekeeper.service.email.EmailService;
+import com.example.carekeeper.service.ContactEmailService;
+import com.example.carekeeper.service.email.SendEmailService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PanicAlertService {
 
-    private final EmailService emailService;
+    private final SendEmailService emailService;
     private final ContactEmailService contactEmailService;
     private final UserRepository userRepository;
 
@@ -75,7 +75,7 @@ public class PanicAlertService {
                 "Alerta de Emergência 🚨",  
                 EmailTemplate.PANIC_ALERT,
                 placeholders,
-                "alertIcon",       
+                "unatiIcon",       
                 alertImagePath   
             );
         }

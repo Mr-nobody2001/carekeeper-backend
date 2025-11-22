@@ -9,8 +9,8 @@ import com.example.carekeeper.model.UserEntity;
 import com.example.carekeeper.repository.AccidentRecordRepository;
 import com.example.carekeeper.repository.UserRepository;
 import com.example.carekeeper.service.detection.AccidentDetection;
-import com.example.carekeeper.service.email.ContactEmailService;
-import com.example.carekeeper.service.email.EmailService;
+import com.example.carekeeper.service.ContactEmailService;
+import com.example.carekeeper.service.email.SendEmailService;
 import com.example.carekeeper.util.EnvironmentUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ import java.util.UUID;
 @Scope("prototype")
 public class SensorService {
 
-    private final EmailService emailService;
+    private final SendEmailService emailService;
     private final AccidentDetection accidentDetection;
     private final EnvironmentUtil envUtil;
     private final ContactEmailService contactEmailService;
@@ -44,8 +44,8 @@ public class SensorService {
 
     private static final Logger logger = Logger.getLogger(SensorService.class.getName());
 
-    public SensorService(
-            EmailService emailService,
+        public SensorService(
+            SendEmailService emailService,
             AccidentDetection accidentDetection,
             EnvironmentUtil envUtil,
             ContactEmailService contactEmailService,
@@ -129,7 +129,7 @@ public class SensorService {
                             subject,
                             EmailTemplate.EMERGENCY_ALERT_TEMPLATE,
                             placeholders,
-                            "alertIcon", // deve coincidir com cid do HTML
+                            "unatiIcon", // deve coincidir com cid do HTML
                             imagePath
                     );
                 }

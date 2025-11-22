@@ -19,7 +19,7 @@ import java.util.Map;
 import com.example.carekeeper.enums.EmailTemplate;
 
 @Service
-public class EmailService {
+public class SendEmailService {
 
     @Autowired
     private JavaMailSender mailSender;
@@ -32,7 +32,7 @@ public class EmailService {
      * @param subject     assunto do e-mail
      * @param template    template HTML (enum)
      * @param placeholders mapa de placeholders e valores
-     * @param contentId   identificador da imagem inline (ex: "alertIcon")
+     * @param contentId   identificador da imagem inline (ex: "unatiIcon")
      * @param imagePath   caminho da imagem (em resources/static/images)
      */
     public void sendEmailWithInlineImage(String to, String subject, EmailTemplate template,
@@ -63,7 +63,7 @@ public class EmailService {
             helper.setSubject(subject);
             helper.setText(htmlFinal, true);
 
-            // 🔹 Adiciona imagem inline (ex: src="cid:alertIcon" no HTML)
+            // 🔹 Adiciona imagem inline (ex: src="cid:unatiIcon" no HTML)
             FileSystemResource image = new FileSystemResource(imagePath);
             helper.addInline(contentId, image);
 

@@ -2,19 +2,26 @@ package com.example.carekeeper.service.detection.config;
 
 import com.example.carekeeper.model.ConfigurationEntity;
 import com.example.carekeeper.pojo.UserConfig;
-import java.util.UUID;
 import com.example.carekeeper.repository.ConfigurationRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Service
 public class UserConfigService {
 
-    private final ConfigurationRepository ConfigurationRepository;
+    private final ConfigurationRepository configurationRepository;
     private final ObjectMapper mapper;
 
-    public UserConfigService(ConfigurationRepository ConfigurationRepository) {
-        this.ConfigurationRepository = ConfigurationRepository;
+    // Cache em memória por userId
+    private final Map<UUID, UserConfig> configCache = new ConcurrentHashMap<>();
+
+    public UserConfigService(ConfigurationRepository configurationRepository) {
+        this.configurationRepository = configurationRepository;
         this.mapper = new ObjectMapper();
     }
 
@@ -26,30 +33,47 @@ public class UserConfigService {
     }
 
     /**
-     * Retorna a configuração do usuário desserializada a partir da tabela `configuracao`.
-     * Se não houver nada, cria um registro padrão no banco (apenas para ambiente dev) e retorna defaults.
+     * Retorna a configuração do usuário, usando cache para evitar múltiplas consultas ao banco.
      */
     public UserConfig getConfigForUser(UUID userId) {
+        // Verifica cache primeiro
+        return configCache.computeIfAbsent(userId, this::loadConfigFromDb);
+    }
+
+    /**
+     * Carrega a configuração do banco e desserializa para UserConfig.
+     * Se não existir, cria uma configuração padrão e persiste.
+     */
+    private UserConfig loadConfigFromDb(UUID userId) {
         try {
-            return ConfigurationRepository.findByUserId(userId)
-                    .map(ConfigurationEntity::getConfigJson)
-                    .map(json -> {
-                        try { return mapper.readValue(json, UserConfig.class); } catch (Exception e) { return new UserConfig(); }
-                    })
-                    .orElseGet(() -> {
-                        // criar configuração padrão e persistir para conveniência no desenvolvimento
-                        try {
-                            UserConfig defaults = new UserConfig();
-                            String json = mapper.writeValueAsString(defaults);
-                            ConfigurationEntity ent = new ConfigurationEntity(userId, json);
-                            ConfigurationRepository.save(ent);
-                            return defaults;
-                        } catch (Exception e) {
-                            return new UserConfig();
-                        }
-                    });
+            Optional<ConfigurationEntity> entityOpt = configurationRepository.findByUserId(userId);
+            if (entityOpt.isPresent()) {
+                String json = entityOpt.get().getConfigJson();
+                try {
+                    return mapper.readValue(json, UserConfig.class);
+                } catch (Exception e) {
+                    return new UserConfig();
+                }
+            } else {
+                // Cria defaults e persiste
+                UserConfig defaults = new UserConfig();
+                try {
+                    String json = mapper.writeValueAsString(defaults);
+                    ConfigurationEntity ent = new ConfigurationEntity(userId, json);
+                    configurationRepository.save(ent);
+                } catch (Exception ignored) { }
+                return defaults;
+            }
         } catch (Exception e) {
             return new UserConfig();
         }
+    }
+
+    /**
+     * Atualiza manualmente a configuração de um usuário no cache (ex.: após alteração).
+     */
+    public void refreshConfig(UUID userId) {
+        configCache.remove(userId);
+        getConfigForUser(userId); // recarrega do banco
     }
 }
