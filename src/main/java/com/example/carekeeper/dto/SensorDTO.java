@@ -27,13 +27,4 @@ public class SensorDTO {
 
     // Tempo
     private Long timestamp;
-
-    // Sensores extras
-    // private Integer heartRate;         // bpm
-    // private Integer oxygen;            // SpO2 %
-    // private Double temperature;        // °C
-    // private Integer systolicPressure;
-    // private Integer diastolicPressure;
-    // private Boolean nearbyMovement;    // true se detectou movimento perto do idoso
-    // private Double luminosity;         // lux
 }

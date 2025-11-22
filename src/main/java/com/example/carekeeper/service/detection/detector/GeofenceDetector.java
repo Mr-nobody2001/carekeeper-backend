@@ -4,6 +4,7 @@ import com.example.carekeeper.interfaces.AccidentDetector;
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.dto.SensorDTO;
 import com.example.carekeeper.util.EnvironmentUtil;
+import com.example.carekeeper.model.UserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,17 +16,20 @@ public class GeofenceDetector implements AccidentDetector {
     private final double centerLat;
     private final double centerLon;
     private final double radiusMeters;
+    private final boolean enabled;
     private final EnvironmentUtil envUtil;
 
-    public GeofenceDetector(double centerLat, double centerLon, double radiusMeters, EnvironmentUtil envUtil) {
-        this.centerLat = centerLat;
-        this.centerLon = centerLon;
-        this.radiusMeters = radiusMeters;
+    public GeofenceDetector(UserConfig.Geofence config, EnvironmentUtil envUtil) {
+        this.centerLat = (config != null) ? config.getCenterLat() : 0.0;
+        this.centerLon = (config != null) ? config.getCenterLon() : 0.0;
+        this.radiusMeters = (config != null) ? config.getRadiusMeters() : 100.0;
+        this.enabled = config.isEnabled();
         this.envUtil = envUtil;
     }
 
     @Override
     public boolean detect(SensorDTO current, SensorDTO previous) {
+        if (!enabled) return false;
         double distance = calcularDistanciaEmMetros(centerLat, centerLon, current.getLatitude(), current.getLongitude());
 
         if (envUtil.isDev()) {

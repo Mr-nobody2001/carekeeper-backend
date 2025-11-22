@@ -4,6 +4,7 @@ import com.example.carekeeper.interfaces.AccidentDetector;
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.dto.SensorDTO;
 import com.example.carekeeper.util.EnvironmentUtil;
+import com.example.carekeeper.model.UserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,18 +13,22 @@ public class ProlongedImmobilityDetector implements AccidentDetector {
     private static final Logger log = LoggerFactory.getLogger(ProlongedImmobilityDetector.class);
     private static final double MOVEMENT_THRESHOLD = 0.02;
 
+    private final boolean enabled;
     private final long timeLimitMs;
     private SensorDTO initialReading;
     private long initialTime;
     private final EnvironmentUtil envUtil;
 
-    public ProlongedImmobilityDetector(long timeLimitMs, EnvironmentUtil envUtil) {
-        this.timeLimitMs = timeLimitMs;
+    public ProlongedImmobilityDetector(UserConfig.Immobility config, EnvironmentUtil envUtil) {
         this.envUtil = envUtil;
+        this.enabled = config.isEnabled();
+        this.timeLimitMs = config.getTimeLimitMs(); // default 1 min
     }
 
     @Override
     public boolean detect(SensorDTO current, SensorDTO previous) {
+        if (!enabled) return false;
+
         if (previous == null) {
             initialReading = current;
             initialTime = current.getTimestamp();

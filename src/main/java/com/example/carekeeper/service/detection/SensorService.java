@@ -1,6 +1,7 @@
 package com.example.carekeeper.service.detection;
 
 import com.example.carekeeper.dto.SensorDTO;
+import com.example.carekeeper.util.EnvironmentUtil;
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.service.email.EmailService;
 import com.example.carekeeper.enums.EmailTemplate;
@@ -21,6 +22,7 @@ public class SensorService {
 
     private final EmailService emailService;
     private final AccidentDetection accidentDetection;
+    private final EnvironmentUtil envUtil;
     private SensorDTO lastReading;
     private boolean hasDetectedAccidents;
     
@@ -29,9 +31,10 @@ public class SensorService {
 
     private static final Logger logger = Logger.getLogger(SensorService.class.getName());
 
-    public SensorService(EmailService emailService, AccidentDetection accidentDetection) {
+    public SensorService(EmailService emailService, AccidentDetection accidentDetection, EnvironmentUtil envUtil) {
         this.emailService = emailService;
         this.accidentDetection = accidentDetection;
+        this.envUtil = envUtil;
     }
 
     /**
@@ -40,13 +43,13 @@ public class SensorService {
      * @param currentReading leitura atual do sensor
      * @return true se algum acidente foi detectado
      */
-    public boolean processReading(SensorDTO currentReading, boolean isAlertActive) {
+    public boolean processReading(Long userId, SensorDTO currentReading, boolean isAlertActive) {
         if (isAlertActive || hasDetectedAccidents) {
             return true;
         }
 
-        // Verifica acidentes comparando com a última leitura
-        List<AccidentType> accidents = accidentDetection.check(currentReading, lastReading);
+        // Verifica acidentes comparando com a última leitura, usando configuração do usuário
+        List<AccidentType> accidents = accidentDetection.check(userId, currentReading, lastReading, envUtil);
         lastReading = currentReading;
 
         hasDetectedAccidents = hasAccidents(accidents);

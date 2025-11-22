@@ -4,6 +4,8 @@ import com.example.carekeeper.interfaces.AccidentDetector;
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.dto.SensorDTO;
 import com.example.carekeeper.util.EnvironmentUtil;
+import com.example.carekeeper.model.UserConfig;
+import com.example.carekeeper.enums.Sensitivity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +16,26 @@ public class FallDetector implements AccidentDetector {
 
     private static final Logger log = LoggerFactory.getLogger(FallDetector.class);
 
-    private static final double FREE_FALL_THRESHOLD = 2.0;
-    private static final double IMPACT_THRESHOLD = 5.5;
-    private static final double IMMOBILITY_THRESHOLD = 1.2;
-    private static final double GYRO_THRESHOLD = 1.5;
-    private static final int READING_WINDOW = 50;
-    private static final int MIN_HISTORY_READINGS = 5;
-    private static final long IMMOBILITY_TIME_MS = 1500;
-    private static final long MAX_FALL_IMPACT_INTERVAL_MS = 800;
+    private static final double DEFAULT_FREE_FALL_THRESHOLD = 2.0;
+    private static final double DEFAULT_IMPACT_THRESHOLD = 5.5;
+    private static final double DEFAULT_IMMOBILITY_THRESHOLD = 1.2;
+    private static final double DEFAULT_GYRO_THRESHOLD = 1.5;
+    private static final int DEFAULT_READING_WINDOW = 50;
+    private static final int DEFAULT_MIN_HISTORY_READINGS = 5;
+    private static final long DEFAULT_IMMOBILITY_TIME_MS = 1500;
+    private static final long DEFAULT_MAX_FALL_IMPACT_INTERVAL_MS = 800;
 
-    private final Deque<SensorDTO> history = new ArrayDeque<>(READING_WINDOW);
+    private final boolean enabled;
+    private final double freeFallThreshold;
+    private final double impactThreshold;
+    private final double immobilityThreshold;
+    private final double gyroThreshold;
+    private final int readingWindow;
+    private final int minHistoryReadings;
+    private final long immobilityTimeMs;
+    private final long maxFallImpactIntervalMs;
+
+    private Deque<SensorDTO> history;
     private SensorDTO lastDetectedFall = null;
     private boolean freeFallPhase = false;
     private boolean impactPhase = false;
@@ -31,8 +43,25 @@ public class FallDetector implements AccidentDetector {
     private long impactTimestamp = 0;
     private final EnvironmentUtil envUtil;
 
-    public FallDetector(EnvironmentUtil envUtil) {
+    public FallDetector(UserConfig.Fall config, EnvironmentUtil envUtil) {
         this.envUtil = envUtil;
+        UserConfig.Fall cfg = (config != null) ? config : new UserConfig.Fall();
+        this.enabled = cfg.isEnabled();
+
+        // Use user-facing sensitivity from UserConfig; keep algorithm thresholds local
+        Sensitivity s = cfg.getSensitivity();
+        double multiplier = (s != null) ? s.getMultiplier() : 1.0;
+
+        this.freeFallThreshold = DEFAULT_FREE_FALL_THRESHOLD * multiplier;
+        this.impactThreshold = DEFAULT_IMPACT_THRESHOLD * multiplier;
+        this.immobilityThreshold = DEFAULT_IMMOBILITY_THRESHOLD * multiplier;
+        this.gyroThreshold = DEFAULT_GYRO_THRESHOLD * multiplier;
+        this.readingWindow = DEFAULT_READING_WINDOW;
+        this.minHistoryReadings = DEFAULT_MIN_HISTORY_READINGS;
+        this.immobilityTimeMs = DEFAULT_IMMOBILITY_TIME_MS;
+        this.maxFallImpactIntervalMs = DEFAULT_MAX_FALL_IMPACT_INTERVAL_MS;
+
+        this.history = new ArrayDeque<>(this.readingWindow);
     }
 
     @Override
@@ -42,9 +71,11 @@ public class FallDetector implements AccidentDetector {
             return false;
         }
 
+        if (!enabled) return false;
+
         history.addLast(current);
-        if (history.size() > READING_WINDOW) history.pollFirst();
-        if (history.size() < MIN_HISTORY_READINGS) return false;
+        if (history.size() > readingWindow) history.pollFirst();
+        if (history.size() < minHistoryReadings) return false;
 
         double ax = current.getAccelerometerX();
         double ay = current.getAccelerometerY();
@@ -63,25 +94,25 @@ public class FallDetector implements AccidentDetector {
 
         long now = current.getTimestamp();
 
-        if (!freeFallPhase && magAcc < FREE_FALL_THRESHOLD) {
+        if (!freeFallPhase && magAcc < freeFallThreshold) {
             freeFallPhase = true;
             freeFallTimestamp = now;
             if (envUtil.isDev()) log.info("🟡 Início de queda livre detectado.");
             return false;
         }
 
-        if (freeFallPhase && !impactPhase && deltaAcc > IMPACT_THRESHOLD) {
-            if (now - freeFallTimestamp <= MAX_FALL_IMPACT_INTERVAL_MS) {
+        if (freeFallPhase && !impactPhase && deltaAcc > impactThreshold) {
+            if (now - freeFallTimestamp <= maxFallImpactIntervalMs) {
                 impactPhase = true;
                 impactTimestamp = now;
                 if (envUtil.isDev()) log.info("🔴 Impacto detectado após queda livre.");
             }
+            freeFallPhase = false;
         }
-        freeFallPhase = false;
 
         if (impactPhase) {
             long timeSinceImpact = now - impactTimestamp;
-            if (timeSinceImpact >= IMMOBILITY_TIME_MS) {
+            if (timeSinceImpact >= immobilityTimeMs) {
                 double sum = 0;
                 int count = 0;
                 for (SensorDTO s : history) {
@@ -94,10 +125,10 @@ public class FallDetector implements AccidentDetector {
                         count++;
                     }
                 }
-                double avgAccNoGravity = (count>0)? sum/count : 0.0;
+                double avgAccNoGravity = (count > 0) ? sum / count : 0.0;
 
-                if (avgAccNoGravity < IMMOBILITY_THRESHOLD) {
-                    if (lastDetectedFall == null || now - lastDetectedFall.getTimestamp() > IMMOBILITY_TIME_MS) {
+                if (avgAccNoGravity < immobilityThreshold) {
+                    if (lastDetectedFall == null || now - lastDetectedFall.getTimestamp() > immobilityTimeMs) {
                         lastDetectedFall = current;
                         impactPhase = false;
                         if (envUtil.isDev()) log.info("✅ Queda confirmada (imobilidade detectada).");
@@ -109,7 +140,7 @@ public class FallDetector implements AccidentDetector {
             }
         }
 
-        if (magGyro > GYRO_THRESHOLD && envUtil.isDev()) {
+        if (magGyro > gyroThreshold && envUtil.isDev()) {
             log.info("ℹ️ Movimento rotacional detectado: magGyro={}", magGyro);
         }
 
