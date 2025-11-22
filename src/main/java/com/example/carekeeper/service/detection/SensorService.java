@@ -5,9 +5,12 @@ import com.example.carekeeper.util.EnvironmentUtil;
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.service.email.EmailService;
 import com.example.carekeeper.enums.EmailTemplate;
+import com.example.carekeeper.model.AlertaAcidenteEntity;
+import com.example.carekeeper.repository.AlertaAcidenteRepository;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
@@ -15,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.UUID;
 
 @Service
 @Scope("prototype")
@@ -30,11 +34,16 @@ public class SensorService {
     private String staticMapApiKey;
 
     private static final Logger logger = Logger.getLogger(SensorService.class.getName());
+    private final AlertaAcidenteRepository alertaRepo;
+    private final ObjectMapper objectMapper;
 
-    public SensorService(EmailService emailService, AccidentDetection accidentDetection, EnvironmentUtil envUtil) {
+    public SensorService(EmailService emailService, AccidentDetection accidentDetection, EnvironmentUtil envUtil,
+                         AlertaAcidenteRepository alertaRepo, ObjectMapper objectMapper) {
         this.emailService = emailService;
         this.accidentDetection = accidentDetection;
         this.envUtil = envUtil;
+        this.alertaRepo = alertaRepo;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -43,7 +52,7 @@ public class SensorService {
      * @param currentReading leitura atual do sensor
      * @return true se algum acidente foi detectado
      */
-    public boolean processReading(Long userId, SensorDTO currentReading, boolean isAlertActive) {
+    public boolean processReading(UUID userId, SensorDTO currentReading, boolean isAlertActive) {
         if (isAlertActive || hasDetectedAccidents) {
             return true;
         }
@@ -88,6 +97,18 @@ public class SensorService {
                         EmailTemplate.EMERGENCY_ALERT_TEMPLATE,
                         placeholders
                 );
+
+                // Persistir leitura do sensor como JSON na tabela `registro_acidente` — uma linha por tipo detectado
+                try {
+                    String sensorJson = objectMapper.writeValueAsString(currentReading);
+                    for (AccidentType at : accidents) {
+                        AlertaAcidenteEntity alerta = new AlertaAcidenteEntity(userId, sensorJson, at, currentReading.getTimestamp());
+                        alertaRepo.save(alerta);
+                    }
+                    if (envUtil.isDev()) logger.info("Alertas salvos no banco para userId=" + userId + " (count=" + accidents.size() + ")");
+                } catch (Exception e) {
+                    logger.severe("Erro ao persistir alerta de acidente: " + e.getMessage());
+                }
 
             } catch (Exception e) {
                 logger.severe("Erro ao processar alerta: " + e.getMessage());
