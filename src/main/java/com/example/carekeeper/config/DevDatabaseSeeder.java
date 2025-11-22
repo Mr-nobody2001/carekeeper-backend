@@ -1,7 +1,7 @@
 package com.example.carekeeper.config;
 
 import com.example.carekeeper.model.ConfiguracaoEntity;
-import com.example.carekeeper.model.UserConfig;
+import com.example.carekeeper.pojo.UserConfig;
 import com.example.carekeeper.repository.ConfiguracaoRepository;
 import com.example.carekeeper.service.detection.config.UserConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;

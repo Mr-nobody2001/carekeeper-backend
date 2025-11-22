@@ -1,4 +1,4 @@
-package com.example.carekeeper.model;
+package com.example.carekeeper.pojo;
 
 import com.example.carekeeper.enums.Sensitivity;
 import lombok.AllArgsConstructor;

@@ -4,7 +4,7 @@ import com.example.carekeeper.interfaces.AccidentDetector;
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.dto.SensorDTO;
 import com.example.carekeeper.util.EnvironmentUtil;
-import com.example.carekeeper.model.UserConfig;
+import com.example.carekeeper.pojo.UserConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
