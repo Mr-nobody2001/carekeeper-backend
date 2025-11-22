@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.example.carekeeper.enums.EmailTemplate;
 import com.example.carekeeper.dto.PanicAlertRequest;
 import com.example.carekeeper.model.ContactEmailEntity;
-import com.example.carekeeper.service.ContactEmailService;
+import com.example.carekeeper.service.email.ContactEmailService;
 import com.example.carekeeper.service.email.EmailService;
 
 @RestController
@@ -33,19 +33,17 @@ public class PanicController {
     /**
      * Endpoint responsável por disparar um alerta de emergência.
      *
-     * <p>Ao receber uma leitura de pânico (via {@link PanicAlertRequest}), o sistema:
-     * <ul>
-     *   <li>Busca todos os contatos de e-mail associados ao usuário informado.</li>
-     *   <li>Gera o corpo do e-mail com informações como leitura, localização e horário do alerta.</li>
-     *   <li>Envia o e-mail para todos os contatos cadastrados do usuário.</li>
-     * </ul>
-     *
-     * <p>Retorna:
-     * <ul>
-     *   <li>{@code 200 OK} se o alerta for processado e enviado.</li>
-     *   <li>{@code 204 No Content} caso o usuário não possua contatos cadastrados.</li>
-     * </ul>
-     * </p>
+     * Ao receber uma leitura de pânico (via {@link PanicAlertRequest}), o sistema:
+     * 
+     *  Busca todos os contatos de e-mail associados ao usuário informado.
+     *  Gera o corpo do e-mail com informações como leitura, localização e horário do alerta.
+     *  Envia o e-mail para todos os contatos cadastrados do usuário.</li>
+     * 
+     * Retorna:
+     * 
+     *  {@code 200 OK} se o alerta for processado e enviado.
+     *  {@code 204 No Content} caso o usuário não possua contatos cadastrados.
+     * 
     */
     @PostMapping("/alerta")
     public ResponseEntity<Void> triggerPanic(

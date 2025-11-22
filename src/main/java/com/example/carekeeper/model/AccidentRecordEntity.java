@@ -16,11 +16,12 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Entity
-@Table(name = "registro_acidente")
+@Table(name = "accident_record")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlertaAcidenteEntity {
+public class AccidentRecordEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,16 +33,16 @@ public class AlertaAcidenteEntity {
     private String sensorJson;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_acidente", columnDefinition = "VARCHAR(64)")
-    private AccidentType tipoAcidente;
+    @Column(name = "accident_type", columnDefinition = "VARCHAR(64)")
+    private AccidentType accidentType;
 
     @Column(name = "detected_at")
     private Long detectedAt;
 
-    public AlertaAcidenteEntity(UUID userId, String sensorJson, AccidentType tipoAcidente, Long detectedAt) {
+    public AccidentRecordEntity(UUID userId, String sensorJson, AccidentType accidentType, Long detectedAt) {
         this.userId = userId;
         this.sensorJson = sensorJson;
-        this.tipoAcidente = tipoAcidente;
+        this.accidentType = accidentType;
         this.detectedAt = detectedAt;
     }
 }

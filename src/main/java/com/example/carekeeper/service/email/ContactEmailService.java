@@ -1,4 +1,4 @@
-package com.example.carekeeper.service;
+package com.example.carekeeper.service.email;
 
 import com.example.carekeeper.model.ContactEmailEntity;
 import com.example.carekeeper.repository.ContactEmailRepository;

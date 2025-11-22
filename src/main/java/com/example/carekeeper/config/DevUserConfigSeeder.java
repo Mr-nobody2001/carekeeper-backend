@@ -1,8 +1,8 @@
 package com.example.carekeeper.config;
 
-import com.example.carekeeper.model.ConfiguracaoEntity;
+import com.example.carekeeper.model.ConfigurationEntity;
 import com.example.carekeeper.pojo.UserConfig;
-import com.example.carekeeper.repository.ConfiguracaoRepository;
+import com.example.carekeeper.repository.ConfigurationRepository;
 import com.example.carekeeper.service.detection.config.UserConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -26,12 +26,12 @@ public class DevUserConfigSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DevUserConfigSeeder.class);
 
-    private final ConfiguracaoRepository repo;
+    private final ConfigurationRepository ConfigurationRepository;
     private final UserConfigService userConfigService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public DevUserConfigSeeder(ConfiguracaoRepository repo, UserConfigService userConfigService) {
-        this.repo = repo;
+    public DevUserConfigSeeder(ConfigurationRepository ConfigurationRepository, UserConfigService userConfigService) {
+        this.ConfigurationRepository = ConfigurationRepository;
         this.userConfigService = userConfigService;
     }
 
@@ -40,12 +40,12 @@ public class DevUserConfigSeeder implements ApplicationRunner {
         UUID demoUserId = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
         // Se não existir configuração para o usuário demo, cria uma padrão
-        if (repo.findByUserId(demoUserId).isEmpty()) {
+        if (ConfigurationRepository.findByUserId(demoUserId).isEmpty()) {
             try {
                 UserConfig defaults = userConfigService.getDefaultConfig();
                 String json = mapper.writeValueAsString(defaults);
-                ConfiguracaoEntity ent = new ConfiguracaoEntity(demoUserId, json);
-                repo.save(ent);
+                ConfigurationEntity ent = new ConfigurationEntity(demoUserId, json);
+                ConfigurationRepository.save(ent);
                 log.info("Persisted default user config for userId={}", demoUserId);
             } catch (Exception e) {
                 log.error("Failed to persist default user config", e);

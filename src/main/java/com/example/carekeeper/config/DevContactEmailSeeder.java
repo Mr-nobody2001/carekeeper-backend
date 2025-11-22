@@ -16,6 +16,12 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.List;
 
+/**
+ * Cria contatos de exemplo no ambiente de desenvolvimento.
+ *
+ * Se o usuário padrão não existir, ele é criado.
+ * Em seguida, adiciona alguns e-mails de contato associados a esse usuário.
+ */
 @Component
 @Order(3)
 @Profile("dev")

@@ -13,21 +13,18 @@ import java.util.UUID;
 public class AccidentDetectionController {
 
     private final SensorService sensorService;
-
     /**
      * Endpoint responsável por receber leituras dos sensores de movimento ou impacto,
      * e processá-las para detectar possíveis acidentes.
      *
-     * <p>O parâmetro {@code ativo} indica se o alerta manual (ex: botão de pânico)
-     * foi acionado pelo usuário.</p>
+     * O parâmetro {@code ativo} indica se o alerta manual (ex: botão de pânico)
+     * foi acionado pelo usuário.
      *
-     * <p>Comportamento:
-     * <ul>
-     *   <li>Se um acidente for detectado (queda, imobilidade, impacto, etc.), retorna {@code 200 OK}.</li>
-     *   <li>Se nenhuma condição de acidente for identificada, retorna {@code 204 No Content}.</li>
-     * </ul>
-     * </p>
-     *
+     * Comportamento:
+     * 
+     *  Se um acidente for detectado (queda, imobilidade, impacto, etc.), retorna {@code 200 OK}.
+     *  Se nenhuma condição de acidente for identificada, retorna {@code 204 No Content}.
+     * 
      * @param sensorDTO     Dados da leitura atual do sensor (movimento, aceleração, etc.)
      * @param isAlertActive Indica se o alerta manual está ativo (botão de pânico pressionado)
      * @param userId        Identificador único do usuário que enviou a leitura

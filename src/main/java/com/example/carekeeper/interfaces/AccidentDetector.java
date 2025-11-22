@@ -4,7 +4,6 @@ import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.dto.SensorDTO;
 
 public interface AccidentDetector {
-
     /**
      * Detecta um acidente com base nas leituras atuais e anteriores do sensor.
      *
