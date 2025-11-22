@@ -1,27 +1,27 @@
 server:
-  address: 0.0.0.0
-  port: 8080
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  port: ${SERVER_PORT:8080}
 spring:
   datasource:
-    url: jdbc:h2:mem:carekeeperdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DATASOURCE_URL:jdbc:h2:mem:carekeeperdb}
+    driver-class-name: ${DATASOURCE_DRIVER:org.h2.Driver}
+    username: ${DATASOURCE_USERNAME:sa}
+    password: ${DATASOURCE_PASSWORD:}
   h2:
     console:
-      enabled: true
-      path: /h2-console
+      enabled: ${H2_CONSOLE_ENABLED:true}
+      path: ${H2_CONSOLE_PATH:/h2-console}
       settings:
-        webAllowOthers: true
+        webAllowOthers: ${H2_CONSOLE_ALLOW_OTHERS:true}
   jpa:
     hibernate:
-      ddl-auto: create
-    show-sql: true
+      ddl-auto: ${JPA_HIBERNATE_DDL:create}
+    show-sql: ${JPA_SHOW_SQL:true}
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${APP_USERNAME}
-    password: ${APP_PASSWORD}
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -30,7 +30,7 @@ spring:
             enable: true
 logging:
   level:
-    root: INFO
-    com.example.carekeeper: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.springframework: INFO
+    root: ${LOG_ROOT:INFO}
+    com.example.carekeeper: ${LOG_APP:DEBUG}
+    org.hibernate.SQL: ${LOG_HIBERNATE_SQL:DEBUG}
+    org.springframework: ${LOG_SPRING:INFO}

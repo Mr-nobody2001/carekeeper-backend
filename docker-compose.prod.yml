@@ -1,9 +1,9 @@
 services:
-  server-dev:
+  server-prod:
     build:
       context: .
-      dockerfile: ./docker/server.dev.dockerfile
-    container_name: server-dev
+      dockerfile: ./docker/server.prod.dockerfile
+    container_name: server-prod
     env_file:
       - .env
     ports:
