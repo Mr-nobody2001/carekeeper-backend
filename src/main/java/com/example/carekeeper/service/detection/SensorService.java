@@ -10,7 +10,7 @@ import com.example.carekeeper.repository.AccidentRecordRepository;
 import com.example.carekeeper.repository.UserRepository;
 import com.example.carekeeper.service.detection.AccidentDetection;
 import com.example.carekeeper.service.ContactEmailService;
-import com.example.carekeeper.service.email.SendEmailService;
+import com.example.carekeeper.service.SendEmailService;
 import com.example.carekeeper.util.EnvironmentUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;

@@ -20,7 +20,7 @@ public class UserConfig {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Geofence {
-        private boolean enabled = true;  
+        private boolean enabled = false;  
         private double centerLat;        // Latitude do centro
         private double centerLon;        // Longitude do centro
         private double radiusMeters;     // Raio em metros

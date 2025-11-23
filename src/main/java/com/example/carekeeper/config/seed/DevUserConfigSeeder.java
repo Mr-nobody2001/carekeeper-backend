@@ -1,9 +1,9 @@
-package com.example.carekeeper.config;
+package com.example.carekeeper.config.seed;
 
 import com.example.carekeeper.model.ConfigurationEntity;
 import com.example.carekeeper.pojo.UserConfig;
 import com.example.carekeeper.repository.ConfigurationRepository;
-import com.example.carekeeper.service.detection.config.UserConfigService;
+import com.example.carekeeper.config.detection.UserConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

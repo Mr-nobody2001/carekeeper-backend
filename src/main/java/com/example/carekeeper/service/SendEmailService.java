@@ -1,7 +1,6 @@
-package com.example.carekeeper.service.email;
+package com.example.carekeeper.service;
 
 import com.example.carekeeper.enums.EmailTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,8 +20,12 @@ import java.util.Objects;
 @Service
 public class SendEmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
+
+    // Injeção por construtor
+    public SendEmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
 
     /**
      * Envia um e-mail usando um template HTML e substitui os placeholders.

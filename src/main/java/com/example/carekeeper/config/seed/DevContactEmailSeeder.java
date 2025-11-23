@@ -1,4 +1,4 @@
-package com.example.carekeeper.config;
+package com.example.carekeeper.config.seed;
 
 import com.example.carekeeper.model.ContactEmailEntity;
 import com.example.carekeeper.model.UserEntity;

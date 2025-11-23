@@ -17,7 +17,7 @@ import com.example.carekeeper.model.UserEntity;
 import com.example.carekeeper.dto.PanicAlertRequest;
 import com.example.carekeeper.repository.UserRepository;
 import com.example.carekeeper.service.ContactEmailService;
-import com.example.carekeeper.service.email.SendEmailService;
+import com.example.carekeeper.service.SendEmailService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.example.carekeeper.config;
+package com.example.carekeeper.config.seed;
 
 import com.example.carekeeper.model.UserEntity;
 import com.example.carekeeper.repository.UserRepository;
@@ -7,8 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -24,9 +25,11 @@ public class DevUserSeeder implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DevUserSeeder.class);
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public DevUserSeeder(UserRepository userRepository) {
         this.userRepository = userRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder(); // cria o encoder
     }
 
     @Override
@@ -39,7 +42,7 @@ public class DevUserSeeder implements ApplicationRunner {
             user.setId(userId);
             user.setName("Usuário Demo");
             user.setEmail("demo@carekeeper.com");
-            user.setPasswordHash("$2a$10$hashed_password_aqui"); // Substitua por um hash real
+            user.setPasswordHash(passwordEncoder.encode("senha123")); // gera hash bcrypt
             user.setPhone("+55 11 99999-9999");
             user.setBirthDate(LocalDate.of(1990, 1, 1));
             user.setPhotoUrl("https://example.com/photo.jpg");

@@ -7,7 +7,7 @@ import com.example.carekeeper.service.detection.detector.FallDetector;
 import com.example.carekeeper.service.detection.detector.GeofenceDetector;
 import com.example.carekeeper.service.detection.detector.ProlongedImmobilityDetector;
 import com.example.carekeeper.pojo.UserConfig;
-import com.example.carekeeper.service.detection.config.UserConfigService;
+import com.example.carekeeper.config.detection.UserConfigService;
 import com.example.carekeeper.util.EnvironmentUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -7,28 +7,37 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
+/**
+ * Controller responsável por gerenciar leituras de sensores e detectar possíveis acidentes.
+ * Todos os endpoints desta classe estão sob a rota base "/monitor".
+ */
 @RestController
 @RequestMapping("/monitor")
 @RequiredArgsConstructor
 public class AccidentDetectionController {
 
     private final SensorService sensorService;
+
     /**
-     * Endpoint responsável por receber leituras dos sensores de movimento ou impacto,
-     * e processá-las para detectar possíveis acidentes.
+     * Endpoint para processar leituras de sensores de movimento ou impacto.
      *
-     * O parâmetro {@code ativo} indica se o alerta manual (ex: botão de pânico)
-     * foi acionado pelo usuário.
+     * Recebe:
+     * - sensorDTO: dados do sensor (movimento, aceleração, etc.)
+     * - isAlertActive: indica se o alerta manual (botão de pânico) foi acionado
+     * - userId: identificador único do usuário que enviou a leitura
      *
      * Comportamento:
-     * 
-     *  Se um acidente for detectado (queda, imobilidade, impacto, etc.), retorna {@code 200 OK}.
-     *  Se nenhuma condição de acidente for identificada, retorna {@code 204 No Content}.
-     * 
-     * @param sensorDTO     Dados da leitura atual do sensor (movimento, aceleração, etc.)
-     * @param isAlertActive Indica se o alerta manual está ativo (botão de pânico pressionado)
-     * @param userId        Identificador único do usuário que enviou a leitura
-     * @return {@code 200 OK} se algum acidente for detectado, ou {@code 204 No Content} caso contrário
+     * - Avalia os dados do sensor para detectar acidentes (queda, impacto, imobilidade, etc.)
+     * - Considera também se o alerta manual está ativo
+     *
+     * Retorna:
+     * - 200 OK se algum acidente for detectado
+     * - 204 No Content se nenhuma condição de acidente for identificada
+     *
+     * @param sensorDTO     Dados da leitura atual do sensor
+     * @param isAlertActive Indica se o alerta manual está ativo
+     * @param userId        Identificador do usuário
+     * @return {@code 200 OK} se acidente detectado, {@code 204 No Content} caso contrário
      */
     @PostMapping("/leitura")
     public ResponseEntity<Void> detectAccident(

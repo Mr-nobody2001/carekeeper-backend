@@ -1,4 +1,4 @@
-package com.example.carekeeper.service.detection.config;
+package com.example.carekeeper.config.detection;
 
 import com.example.carekeeper.model.ConfigurationEntity;
 import com.example.carekeeper.pojo.UserConfig;
