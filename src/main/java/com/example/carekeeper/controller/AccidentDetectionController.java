@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
+import com.example.carekeeper.security.JwtUtil;
+import org.springframework.security.core.Authentication;
 
 /**
  * Controller responsável por gerenciar leituras de sensores e detectar possíveis acidentes.
@@ -17,38 +19,55 @@ import java.util.UUID;
 public class AccidentDetectionController {
 
     private final SensorService sensorService;
+    private final JwtUtil jwtUtil;
 
     /**
-     * Endpoint para processar leituras de sensores de movimento ou impacto.
+     * Este controlador recebe leituras de sensores enviadas pelo aplicativo Android
+     * e utiliza essas informações para determinar se ocorreu um possível acidente
+     * (ex: queda, impacto brusco ou imobilidade prolongada).
      *
-     * Recebe:
-     * - sensorDTO: dados do sensor (movimento, aceleração, etc.)
-     * - isAlertActive: indica se o alerta manual (botão de pânico) foi acionado
-     * - userId: identificador único do usuário que enviou a leitura
+     * Autenticação:
+     * - O identificador do usuário (userId) é extraído automaticamente do token JWT.
+     * - O cliente deve incluir o cabeçalho Authorization: Bearer <token> em cada requisição.
      *
-     * Comportamento:
-     * - Avalia os dados do sensor para detectar acidentes (queda, impacto, imobilidade, etc.)
-     * - Considera também se o alerta manual está ativo
+     * Endpoint principal:
+     * POST /monitor/leitura
      *
-     * Retorna:
-     * - 200 OK se algum acidente for detectado
-     * - 204 No Content se nenhuma condição de acidente for identificada
+     * Parâmetros:
+     * - Corpo (JSON): {@link SensorDTO} contendo dados do acelerômetro, giroscópio e localização.
+     * - Query param (opcional): ativo=true para indicar alerta manual (botão de pânico).
      *
-     * @param sensorDTO     Dados da leitura atual do sensor
-     * @param isAlertActive Indica se o alerta manual está ativo
-     * @param userId        Identificador do usuário
-     * @return {@code 200 OK} se acidente detectado, {@code 204 No Content} caso contrário
+     * Retornos possíveis:
+     * - 200 OK → Um acidente foi detectado.
+     * - 204 No Content → Nenhum evento crítico identificado.
+     * - 401 Unauthorized → Token JWT ausente ou inválido.
+     *
+     * Exemplo de requisição:
+     * POST /monitor/leitura?ativo=true
+     * Authorization: Bearer <token>
+     * {
+     *   "ax": 0.12,
+     *   "ay": 9.81,
+     *   "az": 0.03,
+     *   "gx": 0.01,
+     *   "gy": -0.02,
+     *   "gz": 0.03,
+     *   "latitude": -23.56168,
+     *   "longitude": -46.65584,
+     *   "timestamp": 1698345600000
+     * }
      */
     @PostMapping("/leitura")
     public ResponseEntity<Void> detectAccident(
             @RequestBody SensorDTO sensorDTO,
             @RequestParam(name = "ativo", defaultValue = "false") boolean isAlertActive,
-            @RequestParam(name = "userId") UUID userId
+            Authentication authentication
     ) {
+        UUID userId = UUID.fromString(authentication.getName());
         boolean accidentDetected = sensorService.processReading(userId, sensorDTO, isAlertActive);
 
         return accidentDetected
-            ? ResponseEntity.ok().build()
-            : ResponseEntity.noContent().build();
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.noContent().build();
     }
 }

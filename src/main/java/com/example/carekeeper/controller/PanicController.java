@@ -3,6 +3,7 @@ package com.example.carekeeper.controller;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -21,27 +22,45 @@ public class PanicController {
     private final PanicAlertService panicAlertService;
 
     /**
-     * Endpoint para disparar um alerta de pânico.
+     * Este controlador lida com o acionamento manual do botão de pânico pelo aplicativo Android.
+     * O objetivo é notificar os contatos de emergência do usuário autenticado, informando
+     * sua localização e o contexto do alerta.
      *
-     * Recebe:
-     * - request: JSON com os detalhes da leitura de pânico (ex.: localização, mensagem)
-     * - userId: identificador do usuário que acionou o alerta
+     * Autenticação:
+     * - O identificador do usuário (userId) é extraído automaticamente do token JWT.
+     * - O cliente deve incluir o cabeçalho:
+     *   Authorization: Bearer <token>
      *
-     * Processa:
-     * - Envia alerta via serviço de e-mail ou notificações para os contatos cadastrados
+     * Endpoint principal:
+     * POST /emergencia/alerta
      *
-     * Retorna:
-     * - 200 OK se o alerta foi processado e enviado com sucesso
-     * - 204 No Content se o usuário não possui contatos cadastrados
+     * Corpo da requisição (JSON):
+     * {
+     *   "leitura": "Botão de pânico acionado",
+     *   "latitude": -23.56168,
+     *   "longitude": -46.65584
+     * }
+     *
+     * Retornos possíveis:
+     * - 200 OK → O alerta foi processado e enviado com sucesso aos contatos do usuário.
+     * - 204 No Content → Nenhum contato de emergência foi encontrado para o usuário.
+     * - 401 Unauthorized → Token JWT ausente ou inválido.
+     *
+     * Observações:
+     * - O campo `userId` não deve mais ser enviado no body nem como parâmetro de URL.
+     * - A autenticação é feita automaticamente pelo filtro JWT.
      */
     @PostMapping("/alerta")
     public ResponseEntity<Void> triggerPanic(
             @RequestBody PanicAlertRequest request,
-            @RequestParam UUID userId
+            Authentication authentication
     ) {
+        // Obtém o ID do usuário a partir do token JWT
+        UUID userId = UUID.fromString(authentication.getName());
+
         boolean sent = panicAlertService.sendPanicAlert(userId, request);
 
-        // Retorna OK se enviado, No Content caso não haja destinatários
+        // Retorna 200 OK se o alerta foi enviado, ou 204 se não havia contatos
         return sent ? ResponseEntity.ok().build() : ResponseEntity.noContent().build();
     }
 }

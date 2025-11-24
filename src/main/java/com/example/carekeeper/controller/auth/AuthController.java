@@ -41,11 +41,15 @@ public class AuthController {
     /**
      * Endpoint para logout de usuários.
      *
-     * Este endpoint não invalida o token JWT no servidor (stateless), mas informa ao
-     * cliente que deve descartar o token localmente.
+     * Este endpoint instrui o cliente a descartar o token JWT localmente e, caso
+     * implementada, remove o token de um cache ou blacklist no servidor.
+     * Como JWTs são stateless por natureza, não há invalidação automática no servidor
+     * a menos que você mantenha uma lista de tokens revogados.
      *
-     * Retorna 200 OK sempre.
-     */
+     * Retorna sempre 200 OK para indicar que o logout foi processado com sucesso.
+     *
+     * @param authHeader Cabeçalho "Authorization" contendo o token JWT (Bearer <token>)
+    */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader(name = "Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");

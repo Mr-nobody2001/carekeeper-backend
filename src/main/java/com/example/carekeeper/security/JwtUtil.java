@@ -20,20 +20,16 @@ public class JwtUtil {
     private final long expirationMs = 1000 * 60 * 60; // 1h
 
     @Value("${jwt.secret:}")
-    private String envSecret; // pega do env se existir
+    private String envSecret; 
 
     @PostConstruct
     public void init() {
         if (envSecret != null && !envSecret.isEmpty()) {
-            // decodifica Base64 caso seja fornecido
             byte[] keyBytes = Base64.getDecoder().decode(envSecret);
             secretKey = Keys.hmacShaKeyFor(keyBytes);
+            System.out.println("✅ JWT secret carregado do application.properties");
         } else {
-            // gera uma chave nova segura
-            secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-            // opcional: logar chave gerada para dev
-            System.out.println("JWT secret não fornecido, chave gerada automaticamente (Base64): "
-                    + Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+            throw new IllegalStateException("❌ jwt.secret não configurado — defina no application.properties");
         }
     }
 
