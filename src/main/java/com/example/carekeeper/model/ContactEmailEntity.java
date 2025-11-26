@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 /**
  * Representa um endereço de e-mail de contato associado a um usuário.
@@ -30,6 +31,7 @@ public class ContactEmailEntity {
     /**
      * Usuário dono dessa lista de contatos.
      */
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_user_id", nullable = false)
     private UserEntity owner;

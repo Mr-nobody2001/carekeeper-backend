@@ -11,6 +11,9 @@ import java.util.UUID;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -27,6 +30,7 @@ public class UserEntity {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
@@ -49,6 +53,7 @@ public class UserEntity {
     @Column(name = "deleted_at")
     private OffsetDateTime deletedAt;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContactEmailEntity> contacts = new ArrayList<>();
 }

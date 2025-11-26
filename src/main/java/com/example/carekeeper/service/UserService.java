@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,10 @@ public class UserService {
 
         logger.debug("Usuário validado com sucesso: {}", email);
         return user;
+    }
+
+    public List<UserEntity> getAllUsers() {
+        return userRepository.findAll();
     }
 
     /**
