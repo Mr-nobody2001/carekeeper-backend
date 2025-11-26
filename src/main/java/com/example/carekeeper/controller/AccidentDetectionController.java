@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
  * Todos os endpoints desta classe estão sob a rota base "/monitor".
  */
 @RestController
-@RequestMapping("/monitor")
+@RequestMapping("/api/monitor")
 @RequiredArgsConstructor
 public class AccidentDetectionController {
 

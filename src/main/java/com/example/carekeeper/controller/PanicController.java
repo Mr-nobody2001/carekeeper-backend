@@ -15,7 +15,7 @@ import com.example.carekeeper.service.PanicAlertService;
  * Todos os endpoints desta classe estão sob a rota base "/emergencia".
  */
 @RestController
-@RequestMapping("/emergencia")
+@RequestMapping("/api/emergencia")
 @RequiredArgsConstructor
 public class PanicController {
 
