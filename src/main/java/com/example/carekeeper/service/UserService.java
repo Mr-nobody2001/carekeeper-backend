@@ -58,4 +58,9 @@ public class UserService {
     public UserEntity getUserById(UUID userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
+    
+    public long getTotalUsers() {
+        return userRepository.countAllUsers();
+    }
 }

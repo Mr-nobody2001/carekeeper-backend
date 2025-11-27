@@ -47,4 +47,12 @@ public class UserController {
     }
 
 
+    /**
+     * Retorna o total de usuários cadastrados.
+     * Exemplo: GET /usuarios/total
+    */
+    @GetMapping("/total")
+    public long getTotalUsers() {
+        return userService.getTotalUsers();
+    }
 }
