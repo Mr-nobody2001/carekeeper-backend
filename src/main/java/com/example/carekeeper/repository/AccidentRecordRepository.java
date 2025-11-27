@@ -13,14 +13,14 @@ import com.example.carekeeper.dto.AccidentLocationDTO;
 @Repository
 public interface AccidentRecordRepository extends JpaRepository<AccidentRecordEntity, Long> {
 
-    // Registros de um usuário específico
     List<AccidentRecordEntity> findByUserId(UUID userId);
 
-    // Total de registros de acidentes
     @Query("SELECT COUNT(a) FROM AccidentRecordEntity a")
     Long countTotalRecords();
 
-    // Total de acidentes ocorridos hoje
     @Query("SELECT COUNT(a) FROM AccidentRecordEntity a WHERE a.detectedAt >= :startOfDay AND a.detectedAt <= :endOfDay")
     Long countAccidentsToday(Long startOfDay, Long endOfDay);
+
+    @Query("SELECT a.detectedAt FROM AccidentRecordEntity a")
+    List<Long> findAllTimestamps();
 }

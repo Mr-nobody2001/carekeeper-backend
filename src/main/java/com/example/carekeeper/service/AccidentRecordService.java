@@ -12,6 +12,8 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Serviço responsável por operações de leitura, gravação e estatísticas dos registros de acidentes.
@@ -77,5 +79,23 @@ public class AccidentRecordService {
                 return new AccidentLocationDTO(lat, lon, record.getAccidentType(), record.getDetectedAt());
             })
             .collect(Collectors.toList());
+    }
+
+    
+    /**
+     * Retorna array de 12 posições representando acidentes por intervalos de 2 horas.
+     */
+    public int[] getAcidentesPorHorario() {
+        int[] intervals = new int[12]; // cada posição = 2h
+        List<Long> timestamps = accidentRecordRepository.findAllTimestamps();
+
+        for (Long ts : timestamps) {
+            LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneOffset.UTC);
+            int hour = dt.getHour();
+            int index = hour / 2; // 0-1 => 0, 2-3 => 1, ..., 22-23 => 11
+            intervals[index]++;
+        }
+
+        return intervals;
     }
 }

@@ -85,4 +85,13 @@ public class AccidentRecordController {
     public List<AccidentLocationDTO> getAcidentesLocalizacao() {
         return service.getAcidentesLocalizacao();
     }
+
+    /**
+     * Busca os dados de acidentes agrupados por horário (intervalos de 2h)
+     * Exemplo: GET /api/registros-acidentes/por-horario
+    */
+    @GetMapping("/por-horario")
+    public int[] getAcidentesPorHorario() {
+        return service.getAcidentesPorHorario();
+    }
 }
