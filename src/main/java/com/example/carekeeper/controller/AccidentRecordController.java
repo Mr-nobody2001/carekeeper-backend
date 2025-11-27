@@ -4,6 +4,7 @@ import com.example.carekeeper.model.AccidentRecordEntity;
 import com.example.carekeeper.dto.AccidentLocationDTO;
 import com.example.carekeeper.service.AccidentRecordService;
 import org.springframework.web.bind.annotation.*;
+import com.example.carekeeper.dto.AccidentTypeCountDTO;
 
 import java.util.List;
 import java.util.UUID;
@@ -93,5 +94,23 @@ public class AccidentRecordController {
     @GetMapping("/por-horario")
     public int[] getAcidentesPorHorario() {
         return service.getAcidentesPorHorario();
+    }
+
+    /**
+     * Busca os dados de acidentes agrupados por tipo
+     * Exemplo: GET /api/registros-acidentes/por-tipo
+    */
+    @GetMapping("/por-tipo")
+    public List<AccidentTypeCountDTO> getAcidentesPorTipo() {
+        return service.getAcidentesPorTipo();
+    }
+
+    /**
+     * Retorna a matriz de calor (heatmap) dos acidentes.
+     * Exemplo: GET /api/registros-acidentes/heatmap
+     */
+    @GetMapping("/heatmap")
+    public int[][] getAcidentesHeatmap() {
+        return service.getHeatmapData();
     }
 }

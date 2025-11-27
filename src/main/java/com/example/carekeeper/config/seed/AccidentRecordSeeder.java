@@ -23,6 +23,12 @@ public class AccidentRecordSeeder {
 
             Random random = new Random();
 
+            // Limites aproximados de Goiás
+            double minLat = -18.0;
+            double maxLat = -12.5;
+            double minLon = -52.5;
+            double maxLon = -46.0;
+
             // 5 acidentes de hoje
             LocalDate today = LocalDate.now();
             long startOfDay = today.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
@@ -30,14 +36,20 @@ public class AccidentRecordSeeder {
 
             for (int i = 0; i < 5; i++) {
                 UUID userId = UUID.randomUUID();
-                String sensorJson = String.format("{\"accelerometerX\": %.2f, \"accelerometerY\": %.2f, \"accelerometerZ\": %.2f}",
+                double lat = minLat + (maxLat - minLat) * random.nextDouble();
+                double lon = minLon + (maxLon - minLon) * random.nextDouble();
+
+                String sensorJson = String.format(
+                        "{\"accelerometerX\": %.2f, \"accelerometerY\": %.2f, \"accelerometerZ\": %.2f, \"latitude\": %.6f, \"longitude\": %.6f}",
                         random.nextDouble() * 10,
                         random.nextDouble() * 10,
-                        random.nextDouble() * 10);
+                        random.nextDouble() * 10,
+                        lat,
+                        lon
+                );
 
                 AccidentType accidentType = AccidentType.values()[random.nextInt(AccidentType.values().length)];
 
-                // Timestamp aleatório entre início e fim do dia de hoje
                 long detectedAt = startOfDay + (long) (random.nextDouble() * (endOfDay - startOfDay));
 
                 AccidentRecordEntity record = new AccidentRecordEntity(userId, sensorJson, accidentType, detectedAt);
@@ -47,14 +59,20 @@ public class AccidentRecordSeeder {
             // 15 registros nos últimos 3 dias
             for (int i = 0; i < 15; i++) {
                 UUID userId = UUID.randomUUID();
-                String sensorJson = String.format("{\"accelerometerX\": %.2f, \"accelerometerY\": %.2f, \"accelerometerZ\": %.2f}",
+                double lat = minLat + (maxLat - minLat) * random.nextDouble();
+                double lon = minLon + (maxLon - minLon) * random.nextDouble();
+
+                String sensorJson = String.format(
+                        "{\"accelerometerX\": %.2f, \"accelerometerY\": %.2f, \"accelerometerZ\": %.2f, \"latitude\": %.6f, \"longitude\": %.6f}",
                         random.nextDouble() * 10,
                         random.nextDouble() * 10,
-                        random.nextDouble() * 10);
+                        random.nextDouble() * 10,
+                        lat,
+                        lon
+                );
 
                 AccidentType accidentType = AccidentType.values()[random.nextInt(AccidentType.values().length)];
 
-                // Timestamp aleatório entre 1 e 3 dias atrás
                 long detectedAt = Instant.now().minusSeconds(1 + random.nextInt(3 * 24 * 60 * 60)).toEpochMilli();
 
                 AccidentRecordEntity record = new AccidentRecordEntity(userId, sensorJson, accidentType, detectedAt);

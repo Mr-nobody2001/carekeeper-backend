@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccidentLocationDTO {
-    private Double latitude;
-    private Double longitude;
+public class AccidentTypeCountDTO {
     private String tipo;
-    private Long timestamp;
+    private Long quantidade;
 }

@@ -4,6 +4,7 @@ import com.example.carekeeper.model.AccidentRecordEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import com.example.carekeeper.dto.AccidentTypeCountDTO;
 
 import java.util.List;
 import java.util.UUID;

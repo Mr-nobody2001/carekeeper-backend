@@ -6,6 +6,7 @@ import com.example.carekeeper.repository.AccidentRecordRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import com.example.carekeeper.dto.AccidentTypeCountDTO;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -14,6 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 import java.time.Instant;
+import java.time.ZoneId;
 
 /**
  * Serviço responsável por operações de leitura, gravação e estatísticas dos registros de acidentes.
@@ -62,7 +64,7 @@ public class AccidentRecordService {
     /**
      * Retorna a localização de todos os acidentes.
      */
-   public List<AccidentLocationDTO> getAcidentesLocalizacao() {
+    public List<AccidentLocationDTO> getAcidentesLocalizacao() {
         return accidentRecordRepository.findAll().stream()
             .map(record -> {
                 Double lat = 0.0;
@@ -76,12 +78,13 @@ public class AccidentRecordService {
                     // se der erro no JSON, manter 0.0
                 }
 
-                return new AccidentLocationDTO(lat, lon, record.getAccidentType(), record.getDetectedAt());
+                String tipo = record.getAccidentType() != null ? record.getAccidentType().getTitle() : null;
+
+                return new AccidentLocationDTO(lat, lon, tipo, record.getDetectedAt());
             })
             .collect(Collectors.toList());
     }
 
-    
     /**
      * Retorna array de 12 posições representando acidentes por intervalos de 2 horas.
      */
@@ -97,5 +100,34 @@ public class AccidentRecordService {
         }
 
         return intervals;
+    }
+
+    public List<AccidentTypeCountDTO> getAcidentesPorTipo() {
+        return accidentRecordRepository.findAll().stream()
+            .collect(Collectors.groupingBy(
+                record -> record.getAccidentType() != null ? record.getAccidentType().getTitle() : "Outro",
+                Collectors.counting()
+            ))
+            .entrySet().stream()
+            .map(entry -> new AccidentTypeCountDTO(entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList());
+    }
+
+    public int[][] getHeatmapData() {
+        // matriz 7x24: dias x horas
+        int[][] heatmap = new int[7][24];
+
+        List<AccidentRecordEntity> records = accidentRecordRepository.findAll();
+        for (AccidentRecordEntity record : records) {
+            LocalDateTime dateTime = Instant.ofEpochMilli(record.getDetectedAt())
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+            int dayOfWeek = dateTime.getDayOfWeek().getValue() % 7; // Domingo = 0
+            int hour = dateTime.getHour();
+
+            heatmap[dayOfWeek][hour]++;
+        }
+
+        return heatmap;
     }
 }
