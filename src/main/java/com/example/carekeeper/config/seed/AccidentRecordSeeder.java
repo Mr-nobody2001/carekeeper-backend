@@ -2,7 +2,9 @@ package com.example.carekeeper.config;
 
 import com.example.carekeeper.enums.AccidentType;
 import com.example.carekeeper.model.AccidentRecordEntity;
+import com.example.carekeeper.model.UserEntity;
 import com.example.carekeeper.repository.AccidentRecordRepository;
+import com.example.carekeeper.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -17,9 +20,14 @@ import java.util.UUID;
 public class AccidentRecordSeeder {
 
     @Bean
-    public CommandLineRunner seedAccidentRecords(AccidentRecordRepository repository) {
+    public CommandLineRunner seedAccidentRecords(AccidentRecordRepository recordRepository, UserRepository userRepository) {
         return args -> {
-            if (repository.count() > 0) return; // evita duplicação
+            if (recordRepository.count() > 0) return; // evita duplicação
+            List<UserEntity> users = userRepository.findAll();
+            if (users.isEmpty()) {
+                System.out.println("Seeder: nenhum usuário encontrado, insira usuários antes de popular acidentes.");
+                return;
+            }
 
             Random random = new Random();
 
@@ -35,7 +43,7 @@ public class AccidentRecordSeeder {
             long endOfDay = today.plusDays(1).atStartOfDay().minusNanos(1).toInstant(ZoneOffset.UTC).toEpochMilli();
 
             for (int i = 0; i < 5; i++) {
-                UUID userId = UUID.randomUUID();
+                UserEntity user = users.get(random.nextInt(users.size()));
                 double lat = minLat + (maxLat - minLat) * random.nextDouble();
                 double lon = minLon + (maxLon - minLon) * random.nextDouble();
 
@@ -49,16 +57,15 @@ public class AccidentRecordSeeder {
                 );
 
                 AccidentType accidentType = AccidentType.values()[random.nextInt(AccidentType.values().length)];
-
                 long detectedAt = startOfDay + (long) (random.nextDouble() * (endOfDay - startOfDay));
 
-                AccidentRecordEntity record = new AccidentRecordEntity(userId, sensorJson, accidentType, detectedAt);
-                repository.save(record);
+                AccidentRecordEntity record = new AccidentRecordEntity(user.getId(), sensorJson, accidentType, detectedAt);
+                recordRepository.save(record);
             }
 
             // 15 registros nos últimos 3 dias
             for (int i = 0; i < 15; i++) {
-                UUID userId = UUID.randomUUID();
+                UserEntity user = users.get(random.nextInt(users.size()));
                 double lat = minLat + (maxLat - minLat) * random.nextDouble();
                 double lon = minLon + (maxLon - minLon) * random.nextDouble();
 
@@ -72,14 +79,13 @@ public class AccidentRecordSeeder {
                 );
 
                 AccidentType accidentType = AccidentType.values()[random.nextInt(AccidentType.values().length)];
-
                 long detectedAt = Instant.now().minusSeconds(1 + random.nextInt(3 * 24 * 60 * 60)).toEpochMilli();
 
-                AccidentRecordEntity record = new AccidentRecordEntity(userId, sensorJson, accidentType, detectedAt);
-                repository.save(record);
+                AccidentRecordEntity record = new AccidentRecordEntity(user.getId(), sensorJson, accidentType, detectedAt);
+                recordRepository.save(record);
             }
 
-            System.out.println("Seeder: 20 registros de acidentes inseridos (5 hoje) com sucesso!");
+            System.out.println("Seeder: 20 registros de acidentes inseridos com sucesso, associados aos usuários existentes!");
         };
     }
 }

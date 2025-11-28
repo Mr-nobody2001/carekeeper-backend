@@ -2,15 +2,15 @@ package com.example.carekeeper.controller;
 
 import com.example.carekeeper.model.AccidentRecordEntity;
 import com.example.carekeeper.dto.AccidentLocationDTO;
+import com.example.carekeeper.dto.AccidentTypeCountDTO;
 import com.example.carekeeper.service.AccidentRecordService;
 import org.springframework.web.bind.annotation.*;
-import com.example.carekeeper.dto.AccidentTypeCountDTO;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/registros-acidentes") 
+@RequestMapping("/api/registros-acidentes")
 public class AccidentRecordController {
 
     private final AccidentRecordService service;
@@ -19,6 +19,9 @@ public class AccidentRecordController {
         this.service = service;
     }
 
+    // -------------------
+    // Operações CRUD básicas
+    // -------------------
 
     /**
      * Retorna todos os registros de acidentes.
@@ -48,7 +51,7 @@ public class AccidentRecordController {
     }
 
     /**
-     * Remove um registro pelo ID.
+     * Remove um registro de acidente pelo ID.
      * Exemplo: DELETE /api/registros-acidentes/{id}
      */
     @DeleteMapping("/{id}")
@@ -57,60 +60,64 @@ public class AccidentRecordController {
     }
 
     // -------------------
-    // Endpoints para os cards do dashboard
+    // Endpoints do Dashboard
     // -------------------
 
     /**
-     * Retorna o total de registros de acidentes.
-     * Exemplo: GET /api/registros-acidentes/total-registros
+     * Retorna o total de registros de acidentes, com ou sem filtro de usuário.
+     * Exemplo: GET /api/registros-acidentes/total-registros?userId={id}
      */
     @GetMapping("/total-registros")
-    public Long totalRegistros() {
-        return service.getTotalRecords();
+    public Long totalRegistros(@RequestParam(required = false) UUID userId) {
+        return service.getTotalRecords(userId);
     }
 
     /**
-     * Retorna o total de acidentes ocorridos hoje.
-     * Exemplo: GET /api/registros-acidentes/acidentes-hoje
+     * Retorna o total de acidentes ocorridos hoje, com ou sem filtro de usuário.
+     * Exemplo: GET /api/registros-acidentes/acidentes-hoje?userId={id}
      */
     @GetMapping("/acidentes-hoje")
-    public Long acidentesHoje() {
-        return service.getAccidentsToday();
+    public Long acidentesHoje(@RequestParam(required = false) UUID userId) {
+        return service.getAccidentsToday(userId);
     }
 
-      /**
-     * Retorna a localização de todos os acidentes.
-     * Exemplo: GET /api/registros-acidentes/localizacao
+    /**
+     * Retorna a localização dos acidentes (para exibição no mapa),
+     * com ou sem filtro de usuário.
+     * Exemplo: GET /api/registros-acidentes/localizacao?userId={id}
      */
     @GetMapping("/localizacao")
-    public List<AccidentLocationDTO> getAcidentesLocalizacao() {
-        return service.getAcidentesLocalizacao();
+    public List<AccidentLocationDTO> getAcidentesLocalizacao(@RequestParam(required = false) UUID userId) {
+        return service.getAcidentesLocalizacao(userId);
     }
 
     /**
-     * Busca os dados de acidentes agrupados por horário (intervalos de 2h)
-     * Exemplo: GET /api/registros-acidentes/por-horario
-    */
+     * Retorna os dados de acidentes agrupados por horário (intervalos de 2h),
+     * com ou sem filtro de usuário.
+     * Exemplo: GET /api/registros-acidentes/por-horario?userId={id}
+     */
     @GetMapping("/por-horario")
-    public int[] getAcidentesPorHorario() {
-        return service.getAcidentesPorHorario();
+    public int[] getAcidentesPorHorario(@RequestParam(required = false) UUID userId) {
+        return service.getAcidentesPorHorario(userId);
     }
 
     /**
-     * Busca os dados de acidentes agrupados por tipo
-     * Exemplo: GET /api/registros-acidentes/por-tipo
-    */
+     * Retorna os dados de acidentes agrupados por tipo,
+     * com ou sem filtro de usuário.
+     * Exemplo: GET /api/registros-acidentes/por-tipo?userId={id}
+     */
     @GetMapping("/por-tipo")
-    public List<AccidentTypeCountDTO> getAcidentesPorTipo() {
-        return service.getAcidentesPorTipo();
+    public List<AccidentTypeCountDTO> getAcidentesPorTipo(@RequestParam(required = false) UUID userId) {
+        return service.getAcidentesPorTipo(userId);
     }
 
     /**
-     * Retorna a matriz de calor (heatmap) dos acidentes.
-     * Exemplo: GET /api/registros-acidentes/heatmap
+     * Retorna os dados do heatmap (matriz dia da semana x hora do dia),
+     * com ou sem filtro de usuário.
+     * Exemplo: GET /api/registros-acidentes/heatmap?userId={id}
      */
     @GetMapping("/heatmap")
-    public int[][] getAcidentesHeatmap() {
-        return service.getHeatmapData();
+    public int[][] getAcidentesHeatmap(@RequestParam(required = false) UUID userId) {
+        return service.getHeatmapData(userId);
     }
 }

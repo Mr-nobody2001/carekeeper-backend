@@ -35,7 +35,7 @@ public class UserController {
     /**
      * Retorna um usuário pelo seu ID.
      * Exemplo: GET /api/users/{id}
-     */
+    */
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable UUID id) {
         UserEntity user = userService.getUserById(id);

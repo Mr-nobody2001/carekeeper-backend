@@ -1,25 +1,17 @@
 package com.example.carekeeper.service;
 
 import com.example.carekeeper.dto.AccidentLocationDTO;
+import com.example.carekeeper.dto.AccidentTypeCountDTO;
 import com.example.carekeeper.model.AccidentRecordEntity;
 import com.example.carekeeper.repository.AccidentRecordRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import com.example.carekeeper.dto.AccidentTypeCountDTO;
 
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.time.LocalDateTime;
-import java.time.Instant;
-import java.time.ZoneId;
 
-/**
- * Serviço responsável por operações de leitura, gravação e estatísticas dos registros de acidentes.
- */
 @Service
 public class AccidentRecordService {
 
@@ -31,7 +23,10 @@ public class AccidentRecordService {
         this.objectMapper = objectMapper;
     }
 
-    // Operações CRUD básicas
+    // -------------------
+    // CRUD
+    // -------------------
+
     public List<AccidentRecordEntity> findAll() {
         return accidentRecordRepository.findAll();
     }
@@ -48,86 +43,87 @@ public class AccidentRecordService {
         accidentRecordRepository.deleteById(id);
     }
 
-    // Novas funções para alimentar os cards
-    public Long getTotalRecords() {
-        return accidentRecordRepository.countTotalRecords();
+    // -------------------
+    // Estatísticas (com ou sem filtro de usuário)
+    // -------------------
+
+    public Long getTotalRecords(UUID userId) {
+        if (userId != null)
+            return accidentRecordRepository.countByUserId(userId);
+        return accidentRecordRepository.count();
     }
 
-    public Long getAccidentsToday() {
+    public Long getAccidentsToday(UUID userId) {
         LocalDate today = LocalDate.now();
         long startOfDay = today.atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
-        long endOfDay = today.plusDays(1).atStartOfDay().minusNanos(1)
-                             .toInstant(ZoneOffset.UTC).toEpochMilli();
-        return accidentRecordRepository.countAccidentsToday(startOfDay, endOfDay);
+        long endOfDay = today.plusDays(1).atStartOfDay().minusNanos(1).toInstant(ZoneOffset.UTC).toEpochMilli();
+
+        if (userId != null)
+            return accidentRecordRepository.countByUserIdAndDetectedAtBetween(userId, startOfDay, endOfDay);
+        return accidentRecordRepository.countByDetectedAtBetween(startOfDay, endOfDay);
     }
 
-    /**
-     * Retorna a localização de todos os acidentes.
-     */
-    public List<AccidentLocationDTO> getAcidentesLocalizacao() {
-        return accidentRecordRepository.findAll().stream()
-            .map(record -> {
-                Double lat = 0.0;
-                Double lon = 0.0;
+    public List<AccidentLocationDTO> getAcidentesLocalizacao(UUID userId) {
+        List<AccidentRecordEntity> records = userId != null
+                ? accidentRecordRepository.findByUserId(userId)
+                : accidentRecordRepository.findAll();
 
-                try {
-                    JsonNode json = objectMapper.readTree(record.getSensorJson());
-                    if (json.has("latitude")) lat = json.get("latitude").asDouble();
-                    if (json.has("longitude")) lon = json.get("longitude").asDouble();
-                } catch (Exception e) {
-                    // se der erro no JSON, manter 0.0
-                }
-
-                String tipo = record.getAccidentType() != null ? record.getAccidentType().getTitle() : null;
-
-                return new AccidentLocationDTO(lat, lon, tipo, record.getDetectedAt());
-            })
-            .collect(Collectors.toList());
+        return records.stream()
+                .map(record -> {
+                    double lat = 0.0, lon = 0.0;
+                    try {
+                        JsonNode json = objectMapper.readTree(record.getSensorJson());
+                        if (json.has("latitude")) lat = json.get("latitude").asDouble();
+                        if (json.has("longitude")) lon = json.get("longitude").asDouble();
+                    } catch (Exception ignored) {}
+                    String tipo = record.getAccidentType() != null ? record.getAccidentType().getTitle() : "Desconhecido";
+                    return new AccidentLocationDTO(lat, lon, tipo, record.getDetectedAt());
+                })
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Retorna array de 12 posições representando acidentes por intervalos de 2 horas.
-     */
-    public int[] getAcidentesPorHorario() {
-        int[] intervals = new int[12]; // cada posição = 2h
-        List<Long> timestamps = accidentRecordRepository.findAllTimestamps();
+    public int[] getAcidentesPorHorario(UUID userId) {
+        List<AccidentRecordEntity> records = userId != null
+                ? accidentRecordRepository.findByUserId(userId)
+                : accidentRecordRepository.findAll();
 
-        for (Long ts : timestamps) {
-            LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneOffset.UTC);
-            int hour = dt.getHour();
-            int index = hour / 2; // 0-1 => 0, 2-3 => 1, ..., 22-23 => 11
-            intervals[index]++;
+        int[] intervals = new int[12];
+        for (AccidentRecordEntity record : records) {
+            LocalDateTime dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(record.getDetectedAt()), ZoneOffset.UTC);
+            intervals[dt.getHour() / 2]++;
         }
-
         return intervals;
     }
 
-    public List<AccidentTypeCountDTO> getAcidentesPorTipo() {
-        return accidentRecordRepository.findAll().stream()
-            .collect(Collectors.groupingBy(
-                record -> record.getAccidentType() != null ? record.getAccidentType().getTitle() : "Outro",
-                Collectors.counting()
-            ))
-            .entrySet().stream()
-            .map(entry -> new AccidentTypeCountDTO(entry.getKey(), entry.getValue()))
-            .collect(Collectors.toList());
+    public List<AccidentTypeCountDTO> getAcidentesPorTipo(UUID userId) {
+        List<AccidentRecordEntity> records = userId != null
+                ? accidentRecordRepository.findByUserId(userId)
+                : accidentRecordRepository.findAll();
+
+        return records.stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getAccidentType() != null ? r.getAccidentType().getTitle() : "Outro",
+                        Collectors.counting()
+                ))
+                .entrySet().stream()
+                .map(e -> new AccidentTypeCountDTO(e.getKey(), e.getValue()))
+                .collect(Collectors.toList());
     }
 
-    public int[][] getHeatmapData() {
-        // matriz 7x24: dias x horas
-        int[][] heatmap = new int[7][24];
+    public int[][] getHeatmapData(UUID userId) {
+        List<AccidentRecordEntity> records = userId != null
+                ? accidentRecordRepository.findByUserId(userId)
+                : accidentRecordRepository.findAll();
 
-        List<AccidentRecordEntity> records = accidentRecordRepository.findAll();
+        int[][] heatmap = new int[7][24];
         for (AccidentRecordEntity record : records) {
-            LocalDateTime dateTime = Instant.ofEpochMilli(record.getDetectedAt())
+            LocalDateTime dt = Instant.ofEpochMilli(record.getDetectedAt())
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
-            int dayOfWeek = dateTime.getDayOfWeek().getValue() % 7; // Domingo = 0
-            int hour = dateTime.getHour();
-
-            heatmap[dayOfWeek][hour]++;
+            int day = dt.getDayOfWeek().getValue() % 7;
+            int hour = dt.getHour();
+            heatmap[day][hour]++;
         }
-
         return heatmap;
     }
 }
